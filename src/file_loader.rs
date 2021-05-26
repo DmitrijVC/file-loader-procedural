@@ -17,7 +17,7 @@ pub fn f_load(tokens: TokenStream) -> TokenStream {
         }
     ));
 
-    if args.len() < 2 {
+    if args.len() < 3 {
         panic!("f_load macro requires (PATH_TO_FILE, ENCRYPTION_KEY)!");
     }
 
@@ -40,7 +40,7 @@ pub fn f_load(tokens: TokenStream) -> TokenStream {
         }
     }
 
-    let mc = new_magic_crypt!(args.get(1).unwrap(), 256);
+    let mc = new_magic_crypt!(args.get(2).unwrap(), 256);
     let encoded = mc.encrypt_bytes_to_base64(&buffer);
 
     (quote! {
