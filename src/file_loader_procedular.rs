@@ -1,24 +1,43 @@
 #[macro_use] extern crate magic_crypt;
 
-use proc_macro::TokenStream;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
+use proc_macro::{TokenStream, TokenTree};
 use quote::quote;
 use magic_crypt::MagicCryptTrait;
+use random_string::{Charset, generate};
+
+const CHARSET: &'static str = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
 
 
+/// Macro that reads, and encrypts provided file at compile time
+///
+/// Returns a result `<KEY>NULL<FILE_CONTENT>`
+///
+/// # Arguments
+///
+/// * `file_name`
+///
+/// # Examples
+///
+/// ```
+/// let encrypted = f_load!("Cargo.toml");
+/// ```
 #[proc_macro]
 pub fn f_load(tokens: TokenStream) -> TokenStream {
-    let mut args: Vec<String> = Vec::new();
-    args.extend(tokens.into_iter().map(
-        |token| {
-            token.to_string().replace("\"", "")
-        }
-    ));
+    // strenc_initialize!();
 
-    if args.len() < 3 {
-        panic!("f_load macro requires (PATH_TO_FILE, ENCRYPTION_KEY)!");
+    let mut args: Vec<String> = Vec::new();
+    for token in tokens.clone() {
+        args.push( match token {
+            TokenTree::Literal(lit) => lit.to_string().replace("\"", ""),
+            _ => tokens.clone().to_string().replace("\"", ""),  // idk
+        });
+    }
+
+    if args.is_empty() {
+        panic!("f_load macro requires PATH_TO_FILE!");
     }
 
     let path = Path::new(args.get(0).unwrap());
@@ -40,10 +59,13 @@ pub fn f_load(tokens: TokenStream) -> TokenStream {
         }
     }
 
-    let mc = new_magic_crypt!(args.get(2).unwrap(), 256);
+    let key = generate(32, &Charset::new(CHARSET).unwrap()).to_string();
+    let mc = new_magic_crypt!(&key, 256);
     let encoded = mc.encrypt_bytes_to_base64(&buffer);
 
+    let result = key + "\0" + &*encoded;
+
     (quote! {
-        #encoded
+        file_loader::enc!(#result)
     }).into()
 }

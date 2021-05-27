@@ -1,12 +1,13 @@
 [package]
 name = "file-loader-procedural"
-version = "0.1.1"
+version = "1.0.0"
 edition = "2018"
 
 [lib]
-path = "src/file_loader.rs"
+path = "src/file_loader_procedular.rs"
 proc-macro = true
 
 [dependencies]
 magic-crypt = "3.1.8"
 quote = "1.0.9"
+random-string = "0.2.0"

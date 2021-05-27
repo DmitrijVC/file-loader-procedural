@@ -4,7 +4,9 @@ Rust library for storing encrypted content of any file at compile time in the bi
 
 Part of the **file-loader** lib.
 
-## Example
+Versions over **v1.0.0** are not designed to work separately from the **file-loader**.
+
+## Example (under v1.0.0)
 ```Rust
 #[macro_use] extern crate file_loader_procedural;
 
